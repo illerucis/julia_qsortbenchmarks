@@ -23,18 +23,18 @@ function qsort_c_mp!(v, lo=1, hi=length(v))
     @inbounds while lo < hi
         hi-lo <= SMALL_THRESHOLD && return isort(v, lo, hi)
         mi = (lo+hi)>>>1
-        if v[lo] > v[mi]
+        # med = median([v[lo], v[mi], v[hi]])
+        if isless(v[mi], v[lo])
             v[lo], v[mi] = v[mi], v[lo];
         end
-        if v[lo] > v[hi]
-            v[lo], v[hi] = v[hi], v[lo];
+        if isless(v[hi], v[mi])
+            v[mi], v[hi] = v[hi], v[mi];
         end
-        if v[mi] > v[lo]
+        if isless(v[mi], v[lo])
             v[mi], v[lo] = v[lo], v[mi];
         end
+        # @assert v[mi] == med
         v[mi], v[lo] = v[lo], v[mi]
-        highval = v[hi]
-        v[hi] = v[lo]
         i, j = lo, hi;
         pivot = v[lo]
         while true;
@@ -50,7 +50,6 @@ function qsort_c_mp!(v, lo=1, hi=length(v))
             v[i], v[j] = v[j], v[i];
         end
         v[j], v[lo] = v[lo], v[j];
-        v[hi] = highval
         qsort_c_mp!(v, lo, j-1);
         lo = j+1
     end
@@ -88,6 +87,25 @@ function qsort_s_mp!(v, lo=1, hi=length(v))
             i += 1; j -= 1;
         end
         lo < j && qsort_s_mp!(v, lo, j)
+        lo = i
+    end
+    return v;
+end
+
+# julia's current implementation as of v0.2
+function qsort_stdlib!(v, lo=1, hi=length(v))
+    @inbounds while lo < hi
+        hi-lo <= SMALL_THRESHOLD && return isort(v, lo, hi)
+        pivot = v[(lo+hi)>>>1]
+        i, j = lo, hi
+        while true;
+            while isless(v[i], pivot); i += 1; end
+            while isless(pivot, v[j]); j -= 1; end
+            i <= j || break;
+            v[i], v[j] = v[j], v[i]
+            i += 1; j -= 1;
+        end
+        lo < j && qsort_stdlib!(v, lo, j)
         lo = i
     end
     return v;
