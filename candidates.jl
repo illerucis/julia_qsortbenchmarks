@@ -18,7 +18,7 @@ function isort(v, lo=1, hi=length(v))
     return v;
 end
 
-# median of 3 pivot that explicitely puts the pivot in the right place
+# median of 3 pivot that reflects the current pull request
 function qsort_c_mp!(v, lo=1, hi=length(v))
     @inbounds while lo < hi
         hi-lo <= SMALL_THRESHOLD && return isort(v, lo, hi)
@@ -56,38 +56,57 @@ function qsort_c_mp!(v, lo=1, hi=length(v))
     return v;
 end
 
-# median of 3 pivot that simply calculates and uses the median as a pivot
+# median of 3 pivot with the suggested change to median mechanics
+# at most 4 assignments and 3 comparisons
 function qsort_s_mp!(v, lo=1, hi=length(v))
     @inbounds while lo < hi
         hi-lo <= SMALL_THRESHOLD && return isort(v, lo, hi)
         mi = (lo+hi)>>>1
-        if v[lo] > v[mi]
-            if v[lo] < v[hi]
-                pivot = v[lo]
-            elseif v[mi] > v[hi]
-                pivot = v[mi]
+        if isless(v[hi], v[mi])
+            if isless(v[lo], v[hi])
+                mival = v[mi]
+                v[mi] = v[hi]
+                v[hi] = mival
             else
-                pivot = v[hi]
+                loval = v[lo]
+                if isless(v[mi], v[lo])
+                    v[lo] = v[hi]
+                    v[hi] = loval
+                else
+                    v[lo] = v[hi]
+                    v[hi] = v[mi]
+                    v[mi] = loval
+                end
             end
-        else
-            if v[lo] > v[hi]
-                pivot = v[lo]
-            elseif v[mi] < v[hi]
-                pivot = v[mi]
+        elseif isless(v[mi], v[lo])
+            loval = v[lo]
+            if isless(v[lo], v[hi])
+                v[lo] = v[mi]
+                v[mi] = loval
             else
-                pivot = v[hi]
+                v[lo] = v[mi]
+                v[mi] = v[hi]
+                v[hi] = loval
             end
         end
-        i, j = lo, hi
+        v[mi], v[lo] = v[lo], v[mi]
+        i, j = lo, hi;
+        pivot = v[lo]
         while true;
-            while isless(v[i], pivot); i += 1; end
-            while isless(pivot, v[j]); j -= 1; end
-            i <= j || break;
-            v[i], v[j] = v[j], v[i]
-            i += 1; j -= 1;
+            i += 1;
+            while isless(v[i], pivot);
+                i += 1;
+            end
+            j -= 1;
+            while isless(pivot, v[j]);
+                j -= 1;
+            end
+            i >= j && break;
+            v[i], v[j] = v[j], v[i];
         end
-        lo < j && qsort_s_mp!(v, lo, j)
-        lo = i
+        v[j], v[lo] = v[lo], v[j];
+        qsort_c_mp!(v, lo, j-1);
+        lo = j+1
     end
     return v;
 end

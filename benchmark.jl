@@ -4,7 +4,7 @@ a = 10^4
 b = rand(Int64, a)
 c = copy(b)
 
-@time qsort_stdlib!(b, 1, a)
+@time qsort_s_mp!(b, 1, a)
 @time qsort_c_mp!(c, 1, a)
 
 @assert issorted(b)
@@ -27,7 +27,7 @@ for i = 1:numsims
     c = copy(b)
 
     tic()
-    qsort_stdlib!(b)
+    qsort_s_mp!(b)
     qs_s_times[i] = toq()
 
     tic()
