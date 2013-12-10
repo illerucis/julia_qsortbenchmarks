@@ -18,7 +18,7 @@ function isort(v, lo=1, hi=length(v))
     return v;
 end
 
-# median of 3 pivot
+# median of 3 pivot that explicitely puts the pivot in the right place
 function qsort_c_mp!(v, lo=1, hi=length(v))
     @inbounds while lo < hi
         hi-lo <= SMALL_THRESHOLD && return isort(v, lo, hi)
@@ -57,7 +57,7 @@ function qsort_c_mp!(v, lo=1, hi=length(v))
     return v;
 end
 
-# median of 3 pivot
+# median of 3 pivot that simply calculates and uses the median as a pivot
 function qsort_s_mp!(v, lo=1, hi=length(v))
     @inbounds while lo < hi
         hi-lo <= SMALL_THRESHOLD && return isort(v, lo, hi)
