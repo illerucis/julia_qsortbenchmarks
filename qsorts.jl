@@ -45,38 +45,39 @@ end
 
 # median of 3 pivot
 function qsort_c_mp!(v, lo=1, hi=length(v))
-    @inbounds begin
-        hi <= lo && return;
+    @inbounds while lo < hi
         hi-lo <= SMALL_THRESHOLD && return isort(v, lo, hi)
         mi = (lo+hi)>>>1
         if v[lo] > v[mi]
             v[lo], v[mi] = v[mi], v[lo];
         end
-        if v[lo] > v[hi] 
+        if v[lo] > v[hi]
             v[lo], v[hi] = v[hi], v[lo];
         end
-        if v[mi] > v[hi]
-            v[mi], v[hi] = v[hi], v[mi];
+        if v[mi] > v[lo]
+            v[mi], v[lo] = v[lo], v[mi];
         end
         v[mi], v[lo] = v[lo], v[mi]
-        i, j = lo, hi+1;
+        highval = v[hi]
+        v[hi] = v[lo]
+        i, j = lo, hi;
         pivot = v[lo]
         while true;
             i += 1;
             while isless(v[i], pivot);
-                i == hi && break;
                 i += 1;
             end
             j -= 1;
             while isless(pivot, v[j]);
                 j -= 1;
-            end 
+            end
             i >= j && break;
             v[i], v[j] = v[j], v[i];
         end
         v[j], v[lo] = v[lo], v[j];
+        v[hi] = highval
         qsort_c_mp!(v, lo, j-1);
-        qsort_c_mp!(v, j+1, hi);
+        lo = j+1
     end
     return v;
 end
@@ -98,8 +99,8 @@ function qsort_c_rp!(v, lo=1, hi=length(v))
             end
             j -= 1;
             while isless(pivot, v[j]);
-                j -= 1;                
-            end 
+                j -= 1;
+            end
             i >= j && break;
             v[i], v[j] = v[j], v[i]
         end
@@ -111,11 +112,13 @@ function qsort_c_rp!(v, lo=1, hi=length(v))
 end
 
 # canonical, @inbounds macro
-function qsort_c!(v, lo=1, hi=length(v))        
+function qsort_c!(v, lo=1, hi=length(v))
     @inbounds begin
         hi <= lo && return;
         hi-lo <= SMALL_THRESHOLD && return isort(v, lo, hi)
         i, j = lo, hi+1;
+        mid = (lo+hi)>>>1
+        v[lo], v[mid] = v[mid], v[lo]
         pivot = v[lo]
         while true;
             i += 1;
@@ -125,8 +128,8 @@ function qsort_c!(v, lo=1, hi=length(v))
             end
             j -= 1;
             while isless(pivot, v[j]);
-                j -= 1;                
-            end 
+                j -= 1;
+            end
             i >= j && break;
             v[i], v[j] = v[j], v[i]
         end
@@ -161,7 +164,7 @@ function qsort_3way!(v, lo=1, hi=length(v))
 end
 
 # julia's current implementation as of v0.2
-function qsort_stdlib!(v, lo=1, hi=length(v))    
+function qsort_stdlib!(v, lo=1, hi=length(v))
     @inbounds while lo < hi
         hi-lo <= SMALL_THRESHOLD && return isort(v, lo, hi)
         pivot = v[(lo+hi)>>>1]
