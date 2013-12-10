@@ -82,6 +82,43 @@ function qsort_c_mp!(v, lo=1, hi=length(v))
     return v;
 end
 
+# median of 3 pivot
+function qsort_s_mp!(v, lo=1, hi=length(v))
+    @inbounds while lo < hi
+        hi-lo <= SMALL_THRESHOLD && return isort(v, lo, hi)
+        mi = (lo+hi)>>>1
+        if v[lo] > v[mi]
+            if v[lo] < v[hi]
+                pivot = v[lo]
+            elseif v[mi] > v[hi]
+                pivot = v[mi]
+            else
+                pivot = v[hi]
+            end
+        else
+            if v[lo] > v[hi]
+                pivot = v[lo]
+            elseif v[mi] < v[hi]
+                pivot = v[mi]
+            else
+                pivot = v[hi]
+            end
+        end
+        i, j = lo, hi
+        while true;
+            while isless(v[i], pivot); i += 1; end
+            while isless(pivot, v[j]); j -= 1; end
+            i <= j || break;
+            v[i], v[j] = v[j], v[i]
+            i += 1; j -= 1;
+        end
+        lo < j && qsort_s_mp!(v, lo, j)
+        lo = i
+    end
+    return v;
+end
+
+
 # random pivot
 function qsort_c_rp!(v, lo=1, hi=length(v))
     @inbounds begin

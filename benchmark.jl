@@ -1,23 +1,14 @@
-require("qsorts.jl")
-
-# -------- Compile before running benchmarks ------------ #
-
-function semi_shuffle!(v, times_to_swap)
-    for i = 1:times_to_swap
-        j = rand(1:length(v))
-        k = rand(1:length(v))
-        v[j], v[k] = v[k], v[j]
-    end
-end
+require("candidates.jl")
 
 a = 10^4
 b = rand(Int64, a)
-# sort!(b)
-# semi_shuffle!(b, length(b) / 4)
 c = copy(b)
 
-@time qsort_stdlib!(b, 1, a)
+@time qsort_s_mp!(b, 1, a)
 @time qsort_c_mp!(c, 1, a)
+
+@assert issorted(b)
+@assert issorted(c)
 
 tic()
 toq()
@@ -27,19 +18,17 @@ toq()
 # ------------------------------------------------------- #
 
 numsims = 10^4
-qs_stdlib_times = Array(Float64, numsims)
+qs_s_times = Array(Float64, numsims)
 qs_c_times = Array(Float64, numsims)
 
 for i = 1:numsims
 
     b = rand(Int64, a)
-    # sort!(b)
-    # semi_shuffle!(b, length(b) / 4)
     c = copy(b)
 
     tic()
-    qsort_stdlib!(b)
-    qs_stdlib_times[i] = toq()
+    qsort_s_mp!(b)
+    qs_s_times[i] = toq()
 
     tic()
     qsort_c_mp!(c)
@@ -50,7 +39,7 @@ for i = 1:numsims
 
 end
 
-diff_v = (qs_c_times./qs_stdlib_times)
+diff_v = (qs_c_times./qs_s_times)
 
 @show(median(diff_v))
 @show(mean(diff_v))
