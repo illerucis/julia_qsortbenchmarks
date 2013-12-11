@@ -18,9 +18,9 @@ function isort(v, lo, hi)
     return v;
 end
 
-# median of 3 pivot that reflects the current pull request
+# reverse direction
 function qsort_c_mp!(v, lo=1, hi=length(v))
-    @inbounds begin
+    @inbounds while lo < hi
         hi-lo <= SMALL_THRESHOLD && return isort(v, lo, hi)
         mi = (lo+hi)>>>1
         if !isless(v[mi], v[lo]) && !isequal(v[mi], v[lo])
@@ -49,7 +49,7 @@ function qsort_c_mp!(v, lo=1, hi=length(v))
         end
         v[j], v[lo] = v[lo], v[j];
         qsort_c_mp!(v, lo, j-1);
-        qsort_c_mp!(v, j+1, hi);
+        lo = j + 1
     end
     return v;
 end
